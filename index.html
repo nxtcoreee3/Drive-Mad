@@ -135,8 +135,10 @@ const label = document.getElementById("ks-label");
 const panel = document.getElementById("ks-panel");
 const select = document.getElementById("ks-select");
 const input = document.getElementById("ks-input");
+const save = document.getElementById("ks-save");
 
-let holdTimer;
+let holdTimer = null;
+let holding = false;
 
 function updateUI(){
   const saved = localStorage.getItem("killSwitchURL");
@@ -144,50 +146,56 @@ function updateUI(){
   if(saved){
     btn.classList.remove("settings");
     btn.classList.add("active");
-    btn.textContent="!";
-    label.textContent="Hold to change Killswitch";
-  }else{
+    btn.textContent = "!";
+    label.textContent = "Hold to change Killswitch";
+  } else {
     btn.classList.add("settings");
     btn.classList.remove("active");
-    btn.textContent="⚙️";
-    label.textContent="";
+    btn.textContent = "⚙️";
+    label.textContent = "";
   }
 }
 
 updateUI();
 
-btn.addEventListener("click", ()=>{
+btn.addEventListener("mousedown", () => {
+  holding = false;
+
+  holdTimer = setTimeout(() => {
+    holding = true;
+    panel.style.display = "block";
+  }, 1200);
+});
+
+btn.addEventListener("mouseup", () => {
+  clearTimeout(holdTimer);
+
   const saved = localStorage.getItem("killSwitchURL");
-  if(saved){
-    window.location.href = saved;
-  }else{
-    panel.style.display="block";
+
+  if(!holding){
+    if(saved){
+      window.location.href = saved;
+    } else {
+      panel.style.display = "block";
+    }
   }
 });
 
-btn.addEventListener("mousedown", ()=>{
-  holdTimer = setTimeout(()=>{
-    panel.style.display="block";
-  },1200);
-});
-
-btn.addEventListener("mouseup", ()=>{
+btn.addEventListener("mouseleave", () => {
   clearTimeout(holdTimer);
 });
 
-btn.addEventListener("mouseleave", ()=>{
-  clearTimeout(holdTimer);
-});
-
-document.getElementById("ks-save").onclick = ()=>{
+save.onclick = () => {
   let url = select.value || input.value;
+
+  if(!url) return;
 
   if(!url.startsWith("http")){
     url = "https://" + url;
   }
 
-  localStorage.setItem("killSwitchURL",url);
-  panel.style.display="none";
+  localStorage.setItem("killSwitchURL", url);
+  panel.style.display = "none";
   updateUI();
 };
 </script>
