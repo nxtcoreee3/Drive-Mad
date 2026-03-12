@@ -36,6 +36,162 @@
   <link rel="stylesheet" href="webapp/fancade.css">
   <link rel="icon" href="webapp/favicon.ico">
 
+<!-- Kill Switch UI -->
+<style>
+#ks-container{
+  position:fixed;
+  top:15px;
+  left:15px;
+  z-index:999999;
+  font-family:sans-serif;
+}
+
+#ks-btn{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:none;
+  cursor:pointer;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.3);
+}
+
+#ks-btn.settings{
+  background:#222;
+  color:white;
+}
+
+#ks-btn.active{
+  background:#e63946;
+  color:white;
+}
+
+#ks-label{
+  font-size:11px;
+  margin-top:6px;
+  color:#fff;
+  text-align:center;
+  opacity:.8;
+}
+
+#ks-panel{
+  position:fixed;
+  top:80px;
+  left:15px;
+  width:240px;
+  background:rgba(25,25,25,.95);
+  backdrop-filter:blur(10px);
+  padding:16px;
+  border-radius:16px;
+  color:white;
+  display:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+#ks-panel input, #ks-panel select{
+  width:100%;
+  margin-top:8px;
+  padding:6px;
+  border-radius:8px;
+  border:none;
+}
+
+#ks-panel button{
+  margin-top:10px;
+  width:100%;
+  padding:8px;
+  border:none;
+  border-radius:10px;
+  background:#3a86ff;
+  color:white;
+  cursor:pointer;
+}
+</style>
+
+<div id="ks-container">
+  <button id="ks-btn" class="settings">⚙️</button>
+  <div id="ks-label"></div>
+</div>
+
+<div id="ks-panel">
+  <div>Select a site</div>
+  <select id="ks-select">
+    <option value="">Custom</option>
+    <option value="https://google.com">Google</option>
+    <option value="https://wikipedia.com">Wikipedia</option>
+  </select>
+
+  <input id="ks-input" placeholder="https://example.com">
+
+  <button id="ks-save">Save Kill Switch</button>
+</div>
+
+<script>
+const btn = document.getElementById("ks-btn");
+const label = document.getElementById("ks-label");
+const panel = document.getElementById("ks-panel");
+const select = document.getElementById("ks-select");
+const input = document.getElementById("ks-input");
+
+let holdTimer;
+
+function updateUI(){
+  const saved = localStorage.getItem("killSwitchURL");
+
+  if(saved){
+    btn.classList.remove("settings");
+    btn.classList.add("active");
+    btn.textContent="!";
+    label.textContent="Hold to change Killswitch";
+  }else{
+    btn.classList.add("settings");
+    btn.classList.remove("active");
+    btn.textContent="⚙️";
+    label.textContent="";
+  }
+}
+
+updateUI();
+
+btn.addEventListener("click", ()=>{
+  const saved = localStorage.getItem("killSwitchURL");
+  if(saved){
+    window.location.href = saved;
+  }else{
+    panel.style.display="block";
+  }
+});
+
+btn.addEventListener("mousedown", ()=>{
+  holdTimer = setTimeout(()=>{
+    panel.style.display="block";
+  },1200);
+});
+
+btn.addEventListener("mouseup", ()=>{
+  clearTimeout(holdTimer);
+});
+
+btn.addEventListener("mouseleave", ()=>{
+  clearTimeout(holdTimer);
+});
+
+document.getElementById("ks-save").onclick = ()=>{
+  let url = select.value || input.value;
+
+  if(!url.startsWith("http")){
+    url = "https://" + url;
+  }
+
+  localStorage.setItem("killSwitchURL",url);
+  panel.style.display="none";
+  updateUI();
+};
+</script>
+	
 <!-- Top Notification -->
 <style>
 #nxtcoreee3-notification {
